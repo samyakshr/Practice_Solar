@@ -209,6 +209,7 @@ function displayAllSiteTodayWatts(data){
 	});
 	console.log(JSON.stringify(names),JSON.stringify(whrs));
 	makeSumSummaryGraph(names,whrs);
+	mkaeSumSummaryLineGraph(names,whrs);
 }
 
 // Process All Site watts by hour for that day
@@ -222,6 +223,8 @@ function processAllSiteTodayWatts(results) {
 	
 	//console.log(JSON.stringify(data));
 	document.querySelector('#output2').innerHTML += "<h1>Total Kilowatts today</h1>";
+	displayAllSiteTodayWatts(data);
+	document.querySelector('#output3').innerHTML += "<h1>Total Kilowatts today</h1>";
 	displayAllSiteTodayWatts(data);
 }
 
@@ -372,31 +375,29 @@ function makeSumSummaryGraph(names,watts) {
   });
 }
 
-const labels = ["Jan","Feb","Mar","Apr","May","June","July"]
-const site1 = [65, 59, 80, 81, 56, 55, 40];
-const site2 = [24, 34, 54, 62, 34, 54, 23];
-const data = {
-  labels: labels,
-  datasets: [{
-    label: 'Kilowatt hours by month',
-    data: site1,
-    fill: false,
-    borderColor: 'rgb(75, 192, 192)',
-    tension: 0.1
-  },{
-    label: 'Kilowatt hours by month',
-    data: site2,
-    fill: false,
-    borderColor: 'rgb(25, 32, 77)',
-    tension: 0.1
-  }]
-};
- 
-const config = {
-  type: 'line',
-  data: data,
-};
- 
-const ctx = document.getElementById('myChart');
+function makeSumSummaryLineGraph(names,watts) {
+	
+  const ctx = document.getElementById('chart3');
   
-new Chart(ctx, config);
+  if (summaryWhrChart) destroyWhrChart();
+	
+  summaryWhrChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: names,
+      datasets: [{
+        label: 'Kilowatt hours',
+        data: watts,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      //indexAxis: 'y',
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
