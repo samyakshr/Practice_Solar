@@ -159,6 +159,138 @@ function getSitesWatts() {
 	})
 
 }
+// Function NEW
+/*
+function getSitesHourlylyWatts() {
+
+    var command= Url+allSitesDailyWatts;
+    command=command.replace("%DATE%",yesterdaysDate());
+    fetch(command, {
+	method: 'get'
+    })
+	.then (response => response.json() )
+        .then (data => ProcessSitesHourlyWatts(data))
+	.catch(error => {
+	    document.querySelector('#output3').innerHTML = ErrSrv+": Get all sites' hourly watts for today";
+	})
+
+}
+
+function ProcessSitesHourlyWatts(results) 
+{
+var data = results['message'];
+if (!results["success"]) {
+		document.querySelector('#output3').innerHTML = QueryErr+"Get all sites hourly watts for today";
+		return;
+	}
+	wattsLabel = ["hour1", "hour2", "hour3", "hour4", "hour5", "hour6", "hour7", "hour8", "hour9", "hour10", "hour11", "hour12", "hour13"];
+	yesterday = yesterdaysDate();
+	//clearCanvas();
+	dataList = results['message'];
+	names=[]
+	wattsData = [];
+	dataList.forEach(function(site) {
+		siteDate = site[2].split(" ")[0];
+		if (siteDate == yesterday) 
+		{
+			wattsData.push(site[3]);
+			names.push(siteMap[site[0]]);
+		}
+	});
+ HourlyGraph(wattsData, wattsLabel, names);
+}
+
+function HourlyGraph(values, labels, names )
+{
+// values = [[65, 59, 80, 81, 56, 55, 40], [24, 34, 54, 62, 34, 54, 23]] ;
+// names = ["School1", "school2"]
+// labels= ["hour1", "hour2", "hour3", "hour4"] 
+//number of devices 32 
+//document.querySelector('#output3').innerHTML += "<h1>Average Hourly Kilowatts Per School Yesterday</h1>";
+const ctx = document.getElementById('chart3');
+let series = [];
+let categories = [];
+for (let x = 0; x < names.length; x++)
+ {
+  series.push({
+    name: names[x],
+    data: values[x]
+  });
+}
+
+var chart = new ApexCharts(ctx, {
+  chart: {
+    height: 380,
+    width: "100%",
+    type: "line"
+  },
+  stroke: {
+    curve: 'smooth',
+    width: 1.5,
+  },
+  markers: {
+    size: 4,
+  },
+  legend: {
+    show: true,
+    position: 'top'
+  },
+  series: series,
+  xaxis: {
+    categories: labels,
+    title: {
+      text: "Schools"
+    }
+  },
+  yaxis: {
+    title: {
+      text: "Hourly Watts"
+    }
+  }
+});
+//chart.render();
+}
+
+///////////////=======================///////// */
+
+///////////////////////////////////////////////// Last Hope ///////////////////////////
+
+function HourlyGraph(jsons)
+{
+  document.querySelector('#output3').innerHTML += "<h1> Hourly Kilowatts Per School </h1>";
+   const ctx= document.getElementById('chart3');
+  
+  CompositelineGraph= new Chart(ctx, {type: 'line', 
+  data: {
+  labels:["8 AM", "9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM"],
+  datasets: jsons
+  }, 
+  options: {
+      //indexAxis: 'y',
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  
+  });
+}
+////////////////////////////////////////////////////////////////////////////////////////
+
+function MakeJsons(names, allWatts, colors)
+{
+Jsons=[];
+for (let i=0; i<names.length; i++)
+{
+let graph={label:names[i], data: allWatts[i], borderColor: colors[i]};
+Jsons.push(graph);
+}
+return Jsons;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
 
 // Build watt output table 
 function wattTable(data) {
@@ -189,6 +321,57 @@ function sumArray(a) {
 	});
 	return sum;
 }
+//////////////////=========////////////////////
+// a function that returns an array containing all watts recorded by a school during the day 
+function findwatt(data) {
+	var prev = -1
+	let dWatts = [];
+	let dMins= []
+	data.forEach ( function(row) {
+		var time = getTime(row[2]);
+		var watts = row[3];
+		if (prev != 0 || parseInt(watts) != 0) {
+	        dWatts.push(parseInt(time));
+			dMins.push(parseInt(watts));
+		}
+		prev = parseInt(watts);
+    });
+
+    return dWatts;
+}
+
+// a function that returns an array containing all minutes during which watts were recorded for a school throughout the day
+function findmin(data) {
+	var prev = -1
+	let dWatts = [];
+	let dMins= []
+	data.forEach ( function(row) {
+		var time = getTime(row[2]);
+		var watts = row[3];
+		if (prev != 0 || parseInt(watts) != 0) {
+	        dWatts.push(parseInt(time));
+			dMins.push(parseInt(watts));
+		}
+		prev = parseInt(watts);
+    });
+
+    return dMins;
+}
+
+
+// Sum up array, ignoreing nulls
+function sumArray(a) {
+	sum = 0;
+	a.forEach(function(w) {
+		if (w!=null) {
+			sum+=parseInt(w);
+		}
+	});
+	return sum;
+}
+
+
+//////////////////=========////////////////////
 
 // Build data for a graph of total watts for today
 function displayAllSiteTodayWatts(data){
@@ -401,4 +584,13 @@ function makeSumSummaryLineGraph(names,watts) {
     }
   });
 }
-
+// a function that returns yesterday's date
+function yesterdaysDate() {
+	var today = new Date();
+	today.setDate(today.getDate()-1);
+	var dd = String(today.getDate()).padStart(2, '0');
+	var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+	var yyyy = today.getFullYear();
+	var date = yyyy +'-'+ mm +'-'+ dd;
+	return date;
+}
