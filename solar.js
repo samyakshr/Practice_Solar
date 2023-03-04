@@ -258,7 +258,7 @@ var chart = new ApexCharts(ctx, {
 function HourlyGraph(jsons)
 {
   document.querySelector('#output3').innerHTML += "<h1> Hourly Kilowatts Per School </h1>";
-   const ctx= document.getElementById('chart3');
+   const ctx= document.getElementById('chart4');
   
   CompositelineGraph= new Chart(ctx, {type: 'line', 
   data: {
